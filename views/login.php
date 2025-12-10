@@ -132,7 +132,7 @@
       <div class="logo">Soporte TI</div>
       <div class="subtitle">Ingresa tus credenciales para continuar</div>
 
-      <form action="index.php" method="POST">
+      <form action="../controller/login.php" method="POST">
         <div class="mb-4">
           <input type="text" name="usuario" class="form-control" placeholder="Usuario" required autofocus>
         </div>
