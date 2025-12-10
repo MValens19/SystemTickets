@@ -28,18 +28,50 @@
         }
  </style>
 
-  <div class="main-area">
-     <button class="toggle-btn" onclick="toggleSidebar()">
-      <i data-lucide="menu"></i>
-    </button>
 
-            <!-- Navbar -->
-        <div class="topbar">
-      <div class="d-flex align-items-center gap-3">
-        <div class="text-end">
-          <div style="font-weight:600;font-size:0.95rem;">Carlos Mendoza</div>
-          <small style="color:#666;">Área de Sistemas</small>
+  <!-- Toggle con nombre de usuario -->
+  <button class="toggle-btn" onclick="toggleSidebar()" id="toggleBtn">
+    <i data-lucide="menu" id="menuIcon"></i>
+    <span id="userInitials" class="user-initials" style="display:none;">
+      <?php echo strtoupper(substr($_SESSION['nombre'] ?? 'Usuario', 0, 2)); ?>
+    </span>
+  </button>
+
+  <!-- Navbar -->
+  <div class="topbar">
+    <div class="d-flex align-items-center gap-3">
+      <div class="text-end">
+        <div style="font-weight:600;font-size:0.95rem;">
+          <?php echo htmlspecialchars($_SESSION['nombre'] ?? 'Usuario'); ?>
         </div>
-        <div style="width:40px;height:40px;background:#000;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;">CM</div>
+        <small style="color:#666;">
+          <?php echo htmlspecialchars($_SESSION['area'] ?? 'Área'); ?>
+        </small>
+      </div>
+      <div style="width:40px;height:40px;background:#000;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;">
+        <?php echo strtoupper(substr($_SESSION['nombre'] ?? 'U', 0, 2)); ?>
       </div>
     </div>
+  </div>
+
+
+<script>
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const menuIcon = document.getElementById('menuIcon');
+  const userInitials = document.getElementById('userInitials');
+
+  sidebar.classList.toggle('collapsed');
+
+  // Alternar entre ícono y iniciales
+  if (sidebar.classList.contains('collapsed')) {
+    menuIcon.style.display = 'none';
+    userInitials.style.display = 'flex';
+  } else {
+    menuIcon.style.display = 'flex';
+    userInitials.style.display = 'none';
+  }
+
+  lucide.createIcons(); // Refresca el ícono si cambia
+}
+</script>
