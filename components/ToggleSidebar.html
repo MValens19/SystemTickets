@@ -1,0 +1,45 @@
+ <style>
+            /* Navbar superior */
+        .topbar {
+            height: 64px;
+            background: #fff;
+            border-bottom: 1px solid #eaeaea;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-shrink: 0;
+        }
+                /* Toggle pegado al borde del sidebar */
+        .toggle-btn {
+            position: absolute;
+            left: 280px;
+            top: 0;
+            height: 64px;
+            width: 64px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left .3s ease;
+            z-index: 100;
+        }
+ </style>
+
+  <div class="main-area">
+     <button class="toggle-btn" onclick="toggleSidebar()">
+      <i data-lucide="menu"></i>
+    </button>
+
+            <!-- Navbar -->
+        <div class="topbar">
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end">
+          <div style="font-weight:600;font-size:0.95rem;">Carlos Mendoza</div>
+          <small style="color:#666;">Área de Sistemas</small>
+        </div>
+        <div style="width:40px;height:40px;background:#000;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;">CM</div>
+      </div>
+    </div>
