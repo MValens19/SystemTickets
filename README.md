@@ -22,6 +22,12 @@ Sistema interno de gestión de incidencias TI – 2025
 ## Vista de Tickets 
 ![Login del sistema](public/img/Lista.png)
 
+## Control de Usuarios
+![Users](public/img/users.png)
+
+## Reportes
+![Reports](public/img/reports.gif)
+
 ## Tecnologías usadas
 
 | Tecnología     | Versión | Uso                          |
