@@ -1,6 +1,6 @@
 # Soporte TI – Sistema de Tickets Interno
 
-![Vista previa del login](public/images/login-preview.png](public/images/login-preview.png)
+![Login del sistema](public/img/SistemaTI.png)
 
 Sistema interno de gestión de incidencias TI – 2025  
 **Diseñado y desarrollado por Moisés Valencia**
@@ -13,6 +13,13 @@ Sistema interno de gestión de incidencias TI – 2025
 - Dashboard con estadísticas en tiempo real
 - Reportes mensuales automáticos
 - 100% responsive y modo oscuro listo
+
+## Generación de Tickets
+
+![Generar Tickets](public/img/Tickets.png)
+
+## Vista de Tickets 
+![Login del sistema](public/img/Lista.png)
 
 ## Tecnologías usadas
 
@@ -32,3 +39,4 @@ git clone https://github.com/tuusuario/soporte-ti.git
 cd soporte-ti
 # Importa el archivo database.sql
 php -S localhost:8000 -t public
+```
