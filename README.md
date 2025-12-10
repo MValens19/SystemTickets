@@ -41,3 +41,9 @@ cd soporte-ti
 # Importa el archivo database.sql
 php -S localhost:8000 -t public
 ```
+
+## Soporte
+
+El sistema es una demo o template por el momento, pero si quieres ayudarme a desarrollarlo contactame en:
+Correo: moisesrobertov@gmail.com
+
