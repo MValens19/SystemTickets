@@ -1,3 +1,19 @@
+<?php
+session_start();
+
+// Protección
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: ../../views/login.php?error=sesion");
+    exit;
+}
+
+$roles_permitidos = ['admin', 'tecnico'];
+if (!in_array($_SESSION['rol'], $roles_permitidos, true)) {
+    header("Location: ../../views/login.php?error=permiso");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,6 +29,7 @@
   <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
 
   <style>
+    /* Tu estilo original (igual) */
     body {font-family:'Inter',sans-serif;background:#fff;color:#1f1f1f;margin:0;height:100vh;overflow:hidden;}
     .app-container{display:flex;height:100vh;}
     .sidebar{width:280px;background:#fafafa;border-right:1px solid #eaeaea;padding:1.5rem;overflow-y:auto;flex-shrink:0;transition:width .3s ease;}
@@ -20,21 +37,18 @@
     .logo{font-weight:700;font-size:1.5rem;margin-bottom:2.5rem;display:flex;align-items:center;gap:12px;}
     .nav-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;cursor:pointer;font-weight:500;transition:.2s;color:inherit;text-decoration:none;}
     .nav-item:hover,.nav-item.active{background:#000;color:white;}
-
     .main-area{flex:1;display:flex;flex-direction:column;min-width:0;}
     .topbar{height:64px;background:#fff;border-bottom:1px solid #eaeaea;padding:0 2rem;display:flex;align-items:center;justify-content:flex-end;flex-shrink:0;}
     .toggle-btn{position:absolute;left:280px;top:0;height:64px;width:64px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:left .3s ease;z-index:100;}
     .sidebar.collapsed ~ .main-area .toggle-btn{left:0;}
-
     .main-content{flex:1;overflow-y:auto;padding:3rem;}
     .page-title{font-size:2.5rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:0.5rem;}
     .page-subtitle{color:#666;font-size:1.1rem;margin-bottom:2rem;}
     .btn-new{background:#000;color:white;padding:12px 24px;border-radius:10px;font-weight:500;border:none;}
     .btn-new:hover{background:#333;}
-
     #usuarios-grid{margin-top:1rem;}
     .gridjs-container{border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.08);}
-    .gridjs-head{background:white;color:white;font-weight:600; margin-top:1rem; margin-left:1rem;}
+    .gridjs-head{background:white;color:white;font-weight:600; margin-bottom: 1rem; margin-left: 1rem;margin-top: 1rem;}
   </style>
 </head>
 <body>
@@ -45,10 +59,9 @@
   <?php include '../../components/sidebar.html'; ?>
 
   <div class="main-area">
-    <!-- Toggle y navbar -->
     <?php include '../../components/ToggleSidebar.html'; ?>
 
- <div class="main-content">
+    <div class="main-content">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 class="page-title">Usuarios del sistema</h1>
@@ -59,7 +72,7 @@
         </button>
       </div>
 
-      <!-- Tabla dinámica de usuarios -->
+      <!-- Tabla dinámica -->
       <div id="usuarios-grid"></div>
     </div>
   </div>
@@ -77,15 +90,15 @@
         <form id="formUsuario">
           <div class="mb-3">
             <label class="form-label">Nombre completo</label>
-            <input type="text" class="form-control" required>
+            <input type="text" id="nombre" class="form-control" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Puesto</label>
-            <input type="text" class="form-control" placeholder="Ej: Contador, Gerente de ventas">
+            <input type="text" id="puesto" class="form-control">
           </div>
           <div class="mb-3">
             <label class="form-label">Área / Departamento</label>
-            <select class="form-select">
+            <select id="area" class="form-select">
               <option>Contabilidad</option>
               <option>Ventas</option>
               <option>Recursos Humanos</option>
@@ -97,21 +110,29 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Usuario (login)</label>
-            <input type="text" class="form-control" required>
+            <input type="text" id="usuario" class="form-control" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Contraseña</label>
-            <input type="password" class="form-control" required>
+            <input type="password" id="password" class="form-control" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Repetir contraseña</label>
-            <input type="password" class="form-control" required>
+            <input type="password" id="password2" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rol</label>
+            <select id="rol" class="form-select">
+              <option value="usuario">Usuario</option>
+              <option value="tecnico">Técnico</option>
+              <option value="admin">Administrador</option>
+            </select>
           </div>
         </form>
       </div>
       <div class="modal-footer border-0">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-dark">Crear usuario</button>
+        <button type="button" class="btn btn-dark" id="btnCrearUsuario">Crear usuario</button>
       </div>
     </div>
   </div>
@@ -124,24 +145,66 @@
     document.getElementById('sidebar').classList.toggle('collapsed');
   }
 
-  // Datos de usuarios (luego vendrán de PHP + MySQL)
-  const usuarios = [
-    ["Ana Torres", "Contadora", "Contabilidad", "ana.torres", "Activo"],
-    ["Luis Ramírez", "Vendedor", "Ventas", "luis.ramirez", "Activo"],
-    ["Sofía López", "RRHH", "Recursos Humanos", "sofia.lopez", "Activo"],
-    ["Carlos Mendoza", "Técnico TI", "Sistemas", "carlos.mendoza", "Administrador"],
-    ["Jorge Morales", "Director General", "Dirección", "jorge.morales", "Activo"],
-  ];
-
+  // Cargar usuarios desde la BD
   new gridjs.Grid({
-    columns: ["Nombre", "Puesto", "Área", "Usuario", {name:"Rol", formatter:(c)=>`${c}`}],
-    data: usuarios,
+    columns: [
+      "Nombre",
+      "Puesto",
+      "Área",
+      "Usuario",
+      {
+        name: "Rol",
+        formatter: (cell) => `${cell} `
+      }
+    ],
     search: true,
     sort: true,
     pagination: { limit: 15 },
     resizable: true,
-    language: { search: { placeholder: "Buscar usuario…" } }
+    language: { search: { placeholder: "Buscar usuario…" } },
+    server: {
+      url: '../../controller/all_users.php',
+      then: data => data.map(user => [
+        user.nombre,
+        user.puesto || '-',
+        user.area,
+        user.usuario,
+        user.rol
+      ])
+    }
   }).render(document.getElementById("usuarios-grid"));
+
+  // Crear usuario con AJAX
+  document.getElementById('btnCrearUsuario').addEventListener('click', () => {
+    const nombre = document.getElementById('nombre').value.trim();
+    const puesto = document.getElementById('puesto').value.trim();
+    const area = document.getElementById('area').value;
+    const usuario = document.getElementById('usuario').value.trim();
+    const password = document.getElementById('password').value;
+    const password2 = document.getElementById('password2').value;
+    const rol = document.getElementById('rol').value;
+
+    if (password !== password2) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    fetch('../../controller/create_user.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, puesto, area, usuario, password, password2, rol })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        alert('Usuario creado correctamente');
+        bootstrap.Modal.getInstance(document.getElementById('modalNuevoUsuario')).hide();
+        location.reload(); // Recarga para ver el nuevo usuario
+      } else {
+        alert(res.error || 'Error al crear usuario');
+      }
+    });
+  });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

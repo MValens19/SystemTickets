@@ -6,6 +6,7 @@
   <title>Reportar Incidencia · Soporte TI</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
   
   <!-- Quill.js -->
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
@@ -38,21 +39,41 @@
     .status {font-size:0.8rem;padding:4px 10px;border-radius:6px;font-weight:500;}
     .loading {text-align:center;color:#666;padding:2rem;}
     @media (max-width:992px) {.main-layout {flex-direction:column;}.divider {height:1px;width:100%;margin:0;}.form-section, .history-section {padding:2rem;}}
+    .topbar .btn-outline-dark {
+  border-color: #eaeaea;
+  color: #444;
+  transition: all 0.2s;
+}
+.topbar .btn-outline-dark:hover {
+  background: #000;
+  color: white;
+  border-color: #000;
+}
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <div class="topbar">
-    <div class="logo">Soporte TI</div>
-    <div class="user-info">
+ <div class="topbar">
+  <div class="logo">Soporte TI</div>
+  
+  <div class="d-flex align-items-center gap-4">
+    <!-- Información del usuario -->
+    <div class="d-flex align-items-center gap-3">
       <div class="text-end">
         <div class="user-name" id="user-name">Cargando...</div>
         <div class="user-area" id="user-area"></div>
       </div>
       <div class="avatar" id="user-avatar">??</div>
     </div>
+
+    <!-- Botón de cerrar sesión -->
+    <a href="../../controller/logout.php" class="btn btn-outline-dark btn-sm d-flex align-items-center gap-2" 
+       style="border-radius:10px;padding:8px 16px;font-weight:500;text-decoration:none;">
+      <i data-lucide="log-out" style="width:18px;height:18px;"></i>
+      Cerrar sesión
+    </a>
   </div>
+</div>
 
   <!-- Layout dividido -->
   <div class="main-layout">
@@ -129,6 +150,7 @@
   </div>
 
 <script>
+  lucide.createIcons();
   // Quill editor con barra completa
   const quill = new Quill('#editor', {
     theme: 'snow',

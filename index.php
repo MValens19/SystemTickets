@@ -3,13 +3,13 @@ session_start();
 
 // Protección de acceso
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header("Location: /views/login.php?error=sesion");
+    header("Location: http://localhost/tickets/views/login.php");
     exit;
 }
 
 $roles_permitidos = ['admin', 'tecnico'];
 if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, true)) {
-    header("Location: /views/login.php?error=permiso");
+    header("Location: http://localhost/tickets/views/login.php");
     exit;
 }
 ?>

@@ -47,7 +47,7 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
 
     #tickets-grid {margin-top:1rem;}
     .gridjs-container {border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.08);}
-    .gridjs-head {background:#000;color:white;font-weight:600;}
+    .gridjs-head {background:white;color:white;font-weight:600; margin-top: 1rem; margin-left: 1rem;}
     .status {padding:6px 12px;border-radius:6px;font-size:0.85rem;font-weight:500;}
     .urgente {background:#fff2f0;color:#ff4d4f;}
     .alta {background:#fff7e6;color:#fa8c16;}
@@ -57,7 +57,7 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
     .btn-ver-captura {background:#000;color:white;padding:6px 12px;border-radius:8px;font-size:0.85rem;cursor:pointer;transition:.2s;}
     .btn-ver-captura:hover {background:#333;}
     .descripcion-text {font-size:0.9rem;color:#444;max-height:80px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
-    .no-descripcion {color:#999;font-style:italic;}
+    .no-descripcion {color:#999;font-style:italic;} 
 
     /* Modal de imagen */
     #imageModal .modal-content {background:rgba(0,0,0,0.9);border:none;}
