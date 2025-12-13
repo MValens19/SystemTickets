@@ -47,8 +47,8 @@ if (!in_array($_SESSION['rol'], $roles_permitidos, true)) {
     .btn-new{background:#000;color:white;padding:12px 24px;border-radius:10px;font-weight:500;border:none;}
     .btn-new:hover{background:#333;}
     #usuarios-grid{margin-top:1rem;}
-    .gridjs-container{border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.08);}
-    .gridjs-head{background:white;color:white;font-weight:600; margin-bottom: 1rem; margin-left: 1rem;margin-top: 1rem;}
+    .gridjs-container{border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.08); background: #000;}
+    .gridjs-head{background:#000;color:white;font-weight:600; margin-bottom: 1rem; margin-left: 1rem;margin-top: 1rem;}
   </style>
 </head>
 <body>

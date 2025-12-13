@@ -1,18 +1,19 @@
 <?php
 session_start();
 
-// Protección de acceso
+// Protección
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../../views/login.php?error=sesion");
     exit;
 }
 
 $roles_permitidos = ['admin', 'tecnico'];
-if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, true)) {
+if (!in_array($_SESSION['rol'], $roles_permitidos, true)) {
     header("Location: ../../views/login.php?error=permiso");
     exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -26,6 +27,10 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
   <!-- Grid.js -->
   <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
   <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+
+  <!-- Quill.js (para mostrar descripción completa) -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 
   <style>
     body {font-family:'Inter',sans-serif;background:#fff;color:#1f1f1f;margin:0;height:100vh;overflow:hidden;}
@@ -46,23 +51,49 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
     .page-subtitle{color:#666;font-size:1.1rem;margin-bottom:2rem;}
 
     #tickets-grid {margin-top:1rem;}
-    .gridjs-container {border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.08);}
-    .gridjs-head {background:white;color:white;font-weight:600; margin-top: 1rem; margin-left: 1rem;}
+    .gridjs-container {border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.08); background: #000;}
+    .gridjs-head {background:#000;color:white;font-weight:600; margin-top: 1rem; margin-left: 1rem; margin-bottom: 1rem;}
+
     .status {padding:6px 12px;border-radius:6px;font-size:0.85rem;font-weight:500;}
     .urgente {background:#fff2f0;color:#ff4d4f;}
     .alta {background:#fff7e6;color:#fa8c16;}
     .normal {background:#f6ffed;color:#52c41a;}
-    .baja {background:#f9f0ff;color:#8b5cf6;}
     .pendiente {background:#f5f5f5;color:#666;}
-    .btn-ver-captura {background:#000;color:white;padding:6px 12px;border-radius:8px;font-size:0.85rem;cursor:pointer;transition:.2s;}
-    .btn-ver-captura:hover {background:#333;}
-    .descripcion-text {font-size:0.9rem;color:#444;max-height:80px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
-    .no-descripcion {color:#999;font-style:italic;} 
 
-    /* Modal de imagen */
-    #imageModal .modal-content {background:rgba(0,0,0,0.9);border:none;}
-    #imageModal .btn-close {opacity:1;filter:invert(1);}
-    #modalImage {max-height:90vh;max-width:90vw;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+    .btn-detalles {background:#000;color:white;padding:8px 16px;border-radius:8px;font-size:0.9rem;cursor:pointer;transition:.2s;}
+    .btn-detalles:hover {background:#333;}
+
+    /* Modal detalles */
+    #detallesModal .modal-body {padding:0;}
+    #detallesModal .ql-container {border:none;border-radius:0;}
+    #detallesModal .ql-editor {padding:2rem;min-height:400px;font-size:1.1rem;}
+    #detallesModal img {max-width:100%;border-radius:12px;margin:1.5rem 0;box-shadow:0 8px 30px rgba(0,0,0,0.2);}
+    /* Quill en modal – mucho más bonito */
+#quill-detalles .ql-container {
+  border: none !important;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+#quill-detalles .ql-editor {
+  padding: 2rem;
+  min-height: 100%;
+}
+#quill-detalles .ql-editor p {
+  margin-bottom: 1rem;
+}
+#quill-detalles .ql-editor img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  margin: 1.5rem 0;
+  display: block;
+}
+#quill-detalles .ql-editor strong {
+  font-weight: 600;
+}
+#quill-detalles .ql-toolbar {
+  display: none !important; /* Solo lectura */
+}
   </style>
 </head>
 <body>
@@ -79,20 +110,42 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
       <h1 class="page-title">Todos los tickets</h1>
       <p class="page-subtitle">Listado completo de incidencias y solicitudes</p>
 
-      <!-- Tabla dinámica -->
+      <!-- Tabla -->
       <div id="tickets-grid"></div>
     </div>
   </div>
 </div>
 
-<!-- Modal para imagen completa -->
-<div class="modal fade" id="imageModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-xl">
-    <div class="modal-content">
-      <div class="text-end p-3">
+<<!-- Modal Detalles del Ticket (más bonito) -->
+<div class="modal fade" id="detallesModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:16px;overflow:hidden;">
+      <div class="modal-header bg-dark text-white" style="border-radius:16px 16px 0 0;">
+        <h5 class="modal-title" id="modal-titulo" style="font-weight:700;font-size:1.4rem;">Ticket #000</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <img id="modalImage" src="" class="img-fluid" alt="Captura del ticket">
+      <div class="modal-body p-0">
+        <!-- Estado -->
+        <div class="p-4 bg-light border-bottom">
+          <div class="d-flex align-items-center gap-3">
+            <strong>Estado actual:</strong>
+            <select id="estado-select" class="form-select w-auto" style="font-size:1rem;padding:8px 12px; border-radius:8px;">
+              <option value="Pendiente">Pendiente  .</option>
+              <option value="En proceso">En proceso .</option>
+              <option value="Resuelto">Resuelto  .</option>
+              <option value="Cerrado">Cerrado  .</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Editor Quill solo lectura (más bonito) -->
+        <div id="quill-detalles" style="background:white;height:60vh;"></div>
+      </div>
+      <div class="modal-footer bg-light">
+        <small class="text-muted me-auto">Puedes cambiar el estado y cerrar</small>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-success" id="guardarEstadoBtn">Guardar estado</button>
+      </div>
     </div>
   </div>
 </div>
@@ -104,13 +157,27 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
     document.getElementById('sidebar').classList.toggle('collapsed');
   }
 
-  // Cargar tickets desde la BD
+let quillDetails;
+  let currentTicketId = null;
+
+  // Inicializar Quill en modo solo lectura
+  document.addEventListener('DOMContentLoaded', () => {
+    quillDetails = new Quill('#quill-detalles', {
+      theme: 'snow',
+      readOnly: true,
+      modules: {
+        toolbar: false
+      }
+    });
+  });
+
+  // Cargar tickets
   new gridjs.Grid({
     columns: [
       { name: "ID", width: "80px", sort: true },
-      { name: "Asunto", width: "25%", sort: true },
-      { name: "Usuario", width: "15%", sort: true },
-      { name: "Área", width: "100px", sort: true },
+      { name: "Asunto", width: "30%", sort: true },
+      { name: "Usuario", width: "18%", sort: true },
+      { name: "Área", width: "110px", sort: true },
       {
         name: "Prioridad",
         width: "110px",
@@ -124,39 +191,28 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
       },
       {
         name: "Estado",
-        width: "120px",
+        width: "130px",
         sort: true,
         formatter: (cell) => {
           if (cell === "Resuelto") return gridjs.html('<span class="status normal">Resuelto</span>');
           return gridjs.html(`<span class="status pendiente">${cell}</span>`);
         }
       },
-      
       { name: "Fecha", width: "140px", sort: true },
       {
-        name: "Descripción",
-        width: "300px",
+        name: "Detalles",
+        width: "180px",
         sort: false,
-        formatter: (cell) => {
-          if (!cell || cell.trim() === '') {
-            return gridjs.html('<span class="no-descripcion">Sin descripción</span>');
-          }
-          // Extraer solo el texto (sin HTML)
-          const textOnly = cell.replace(/<[^>]*>/g, '').trim();
-          return gridjs.html(`<div class="descripcion-text">${textOnly || 'Sin texto'}</div>`);
-        }
-      },
-      {
-        name: "Captura",
-        width: "140px",
-        sort: false,
-        formatter: (cell) => {
-          if (!cell || !/<img/i.test(cell)) {
-            return gridjs.html('<span class="text-muted">Sin captura</span>');
-          }
+        formatter: (cell, row) => {
+          const id = row.cells[0].data;
+          const descripcion = row.cells[7].data || '';
           return gridjs.html(`
-            <button class="btn-ver-captura" data-content="${btoa(unescape(encodeURIComponent(cell)))}">
-              Ver captura
+            <button class="btn-detalles" 
+                    data-id="${id}" 
+                    data-titulo="${row.cells[1].data}"
+                    data-estado="${row.cells[5].data}"
+                    data-content="${btoa(unescape(encodeURIComponent(descripcion)))}">
+              Ver detalles
             </button>
           `);
         }
@@ -172,42 +228,62 @@ if (!isset($_SESSION['rol']) || !in_array($_SESSION['rol'], $roles_permitidos, t
     },
     server: {
       url: '../../controller/all_tickets.php',
-      then: data => data.map(ticket => [
-        ticket.id_ticket,
-        ticket.titulo,
-        ticket.usuario_nombre,
-        ticket.area,
-        ticket.prioridad,
-        ticket.estado,
-        ticket.fecha_formateada,
-        ticket.descripcion || '',
-        ticket.descripcion || ''
+      then: data => data.map(t => [
+        t.id_ticket,
+        t.titulo,
+        t.usuario_nombre,
+        t.area,
+        t.prioridad,
+        t.estado,
+        t.fecha_formateada,
+        t.descripcion || ''
       ])
     }
   }).render(document.getElementById("tickets-grid"));
 
-  // Abrir modal con la primera imagen
+  // Abrir modal con detalles
   document.addEventListener('click', function(e) {
-    if (e.target.closest('.btn-ver-captura')) {
-      const btn = e.target.closest('.btn-ver-captura');
+    if (e.target.closest('.btn-detalles')) {
+      const btn = e.target.closest('.btn-detalles');
+      currentTicketId = btn.dataset.id;
+
+      // Título
+      document.getElementById('modal-titulo').textContent = 'Ticket #' + btn.dataset.id + ' · ' + btn.dataset.titulo;
+
+      // Estado actual
+      document.getElementById('estado-select').value = btn.dataset.estado;
+
+      // Descripción completa (con imágenes)
       const encoded = btn.dataset.content;
       const html = decodeURIComponent(escape(atob(encoded)));
+      
+      quillDetails.root.innerHTML = html || '<p style="color:#999;font-style:italic;">Sin descripción</p>';
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const img = doc.querySelector('img');
-
-      if (img && img.src) {
-        document.getElementById('modalImage').src = img.src;
-        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
-        modal.show();
-      }
+      const modal = new bootstrap.Modal(document.getElementById('detallesModal'));
+      modal.show();
     }
   });
 
-  // Limpiar modal al cerrar
-  document.getElementById('imageModal').addEventListener('hidden.bs.modal', () => {
-    document.getElementById('modalImage').src = '';
+  // Guardar cambio de estado
+  document.getElementById('guardarEstadoBtn').addEventListener('click', () => {
+    if (!currentTicketId) return;
+
+    const nuevoEstado = document.getElementById('estado-select').value;
+
+    fetch('../../controller/change_estatus.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_ticket: currentTicketId, estado: nuevoEstado })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        alert('Estado actualizado correctamente');
+        location.reload(); // o actualiza la fila sin recargar
+      } else {
+        alert('Error al actualizar estado');
+      }
+    });
   });
 </script>
 
